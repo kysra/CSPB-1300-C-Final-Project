@@ -237,15 +237,224 @@ bool write_image(string filename, const vector<vector<Pixel>>& image)
 //
 // YOUR FUNCTION DEFINITIONS HERE
 //
+vector<vector<Pixel>> process_01 (vector<vector<Pixel>> image_file)
+/**
+ * Adds a vignette to the image
+ * @param image_file The image file to be editted
+ */
+{
+    // Get the size of the image
+    int file_height = image_file.size();
+    int file_width = image_file[0].size();
 
+    // Loops through the pixels in image
+    for (double y = 0; y < file_height; y ++)
+    {
+        for (double x = 0; x < file_width; x++)
+        {
+            Pixel rgb = image_file[y][x];
+
+            // Calculates vignette gradient
+            float dist_y = 1 - pow(2*abs(.5 - y/(file_height-1)),2);
+            float dist_x = 1 - pow(2*abs(.5 - x/(file_width-1)),2);
+            
+            // Applies the gradient
+            rgb.red = rgb.red * dist_y * dist_x;
+            rgb.green = rgb.green * dist_y * dist_x;
+            rgb.blue = rgb.blue * dist_y * dist_x;
+            image_file[y][x] = rgb;
+
+        }
+    }
+    cout << "Executed Process 01: Add Vignette" << endl;
+
+    return image_file;
+}
+
+vector<vector<Pixel>> process_02 (vector<vector<Pixel>> image_file)
+/**
+ * Makes a high contrast version of the image
+ * If the average RGB value of the image is 
+ * greater than 170, colors will be pushed brighter
+ * and vice versa for lower than 90
+ * @param image_file The image file to be editted
+ */
+{
+    // Get the size of the image
+    int file_height = image_file.size();
+    int file_width = image_file[0].size();
+
+    // Loops through the pixels in image
+    for (double y = 0; y < file_height; y ++)
+    {
+        for (double x = 0; x < file_width; x++)
+        {
+            Pixel rgb = image_file[y][x];
+
+            // Calculates average brights and sets contrast levels
+            float average = (rgb.red + rgb.green + rgb.blue)/3;
+            float scaling = .3;
+            
+            // Increases contrast of the image
+            if (average >= 170)
+            {
+                rgb.red = 255 - (255 - rgb.red)*scaling;
+                rgb.green = 255 - (255 - rgb.green)*scaling;
+                rgb.blue = 255 - (255 - rgb.blue)*scaling;
+            } else if (average < 90)
+            {
+                rgb.red = rgb.red*scaling;
+                rgb.green = rgb.green*scaling;
+                rgb.blue = rgb.blue*scaling;
+            }
+
+            // Applies the changes to the image file
+            image_file[y][x] = rgb;
+
+        }
+    }
+    cout << "Executed Process 02: Add Contrast" << endl;
+
+    return image_file;
+}
+
+vector<vector<Pixel>> process_03 (vector<vector<Pixel>> image_file)
+/**
+ * Changes the image to greyscale
+ * @param image_file The image file to be editted
+ */
+{
+    // Get the size of the image
+    int file_height = image_file.size();
+    int file_width = image_file[0].size();
+
+    // Loops through the pixels in image
+    for (double y = 0; y < file_height; y ++)
+    {
+        for (double x = 0; x < file_width; x++)
+        {
+            Pixel rgb = image_file[y][x];
+
+            // Calculates average greyscale value
+            int grey_val = (rgb.red + rgb.green + rgb.blue)/3;
+            
+            // Applies the gradient
+            rgb.red = grey_val;
+            rgb.green = grey_val;
+            rgb.blue = grey_val;
+            image_file[y][x] = rgb;
+
+        }
+    }
+    cout << "Executed Process 03: Greyscale" << endl;
+
+    return image_file;
+}
+
+vector<vector<Pixel>> process_04 (vector<vector<Pixel>> image_file)
+/**
+ * Rotates the image by 90 degrees
+ * @param image_file The image file to be editted
+ */
+{
+    cout << "Starting rotation with square! " << endl;
+    // Get the size of the image
+    int file_height = image_file.size();
+    int file_width = image_file[0].size();
+    cout << "Input Height: " << file_height << " Input Width: " << file_width << endl;
+
+    // Creates a new image that is rotated
+    vector<vector<Pixel>> image_rotate (file_width, 
+                                        vector<Pixel> (file_height)); 
+
+    // Loops through the pixels in image
+    // Looping through the dimensions of the
+    // new image and copying the old image
+    for (double y = 0; y < file_height; y ++)
+    {
+        for (double x = 0; x < file_width; x++)
+        {
+            Pixel rgb = image_file[y][x];
+            image_rotate[x][file_height -y] = rgb;
+
+        }
+    }
+    cout << "Old File Height: " << file_height << " Old File Width: " << file_width << endl;
+    cout << "New File Height: " << image_rotate.size() << " New File Width: " << image_rotate[0].size() << endl;
+    cout << "Old Pixel (24, 165): " << image_file[124][165].red << "," << image_file[124][165].green << "," << image_file[124][165].blue << endl;
+    cout << "New Pixel (24, 165): " << image_rotate[124][165].red << "," << image_rotate[124][165].green << "," << image_rotate[124][165].blue << endl;
+    cout << "Executed Process 04: Rotate 90 Degrees" << endl;
+
+    return image_rotate;
+}
+
+vector<vector<Pixel>> process_05 (vector<vector<Pixel>> image_file, int angle)
+/**
+ * Rotates the image multiple times
+ * @param image_file The image file to be editted
+ * @param angle The angle which the image will be rotated
+ */
+{
+    //*/ Calculates how many times will rotate
+    int turns = angle / 90;
+    cout << "# of Turns: " << turns << endl;
+    if (angle % 90 != 0)
+    {
+        cout << "Angle is not a multiple of 90, rounding..." 
+        << endl;
+    }
+
+    //while (turns > 5)
+    //    turns = turns-4; 
+
+    //if (turns == 4) 
+    //{
+    //    return image_file;
+    //} 
+
+    vector<vector<Pixel>> image_rotate_01 = process_04(image_file);
+    vector<vector<Pixel>> image_rotate_02 = process_04(image_rotate_01);
+    vector<vector<Pixel>> image_rotate_03 = process_04(image_rotate_02);
+    vector<vector<Pixel>> image_rotate_04 = process_04(image_rotate_03);
+
+    cout << "Executed Process 05: Rotate Multiples of 90 Degrees" << endl;
+
+    return image_rotate_01;
+
+}
 
 int main()
 {
-    
-    //
-    // YOUR CODE HERE
-    //
-	cout << "\n\n\nThis line should be your own code!\n\n\n";
 
+
+    // Reads in an image at a given path
+    string file_path = "E:/courses/02_CSPB/24_Fall/CSPB_1300_CompSci/final_project/CSPB-1300-C-Final-Project/sample.bmp";
+	vector<vector<Pixel>> input_image = read_image(file_path);
+
+    // Process 1
+    //vector<vector<Pixel>> process01_image = process_01(input_image);
+
+    // Process 2
+    //vector<vector<Pixel>> process02_image = process_02(input_image);
+
+    //Process 3
+    //vector<vector<Pixel>> process03_image = process_03(input_image);
+
+    //Process 4
+    //vector<vector<Pixel>> process04_image = process_04(input_image);
+
+    //Process 5
+    vector<vector<Pixel>> process05_image = process_05(input_image, 270);
+
+    // Outputs if it was done sucessfully
+    string output_path = "test_output.bmp";
+    if (write_image(output_path, process05_image))
+    {
+        cout << "Sucessful write: " << output_path << endl;
+    } else 
+    {
+        cout << "Failed to output" << endl;
+    }
     return 0;
+
 }
