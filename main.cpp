@@ -238,6 +238,7 @@ bool write_image(string filename, const vector<vector<Pixel>>& image)
 // YOUR FUNCTION DEFINITIONS HERE
 //
 #include <algorithm>
+#include <string>
 
 vector<vector<Pixel>> process_01 (vector<vector<Pixel>> image_file)
 /**
@@ -654,50 +655,311 @@ vector<vector<Pixel>> process_10 (vector<vector<Pixel>> image_file)
 }
 
 int main()
+/* Provides a UI for the image processing application
+*/
 {
-    // Reads in an image at a given path
-    string file_path = "E:/courses/02_CSPB/24_Fall/CSPB_1300_CompSci/final_project/CSPB-1300-C-Final-Project/sample_01.bmp";
-	vector<vector<Pixel>> input_image = read_image(file_path);
+    // Initial variable set up
+    string sentinel;
+    string input_val;
+    string menu_val;
+    string file_path;
+    // Initial menu UI
+    cout << endl << "----------------======----------------" << endl
+    << "CSPB 1300 Image Processing Application" << endl
+    << "----------------======----------------" << endl
+    << "This application will take an input image file and make modifications to it" ;
 
-    // Process 1
-    //vector<vector<Pixel>> process_image = process_01(input_image);
-
-    // Process 2
-    //vector<vector<Pixel>> process_image = process_02(input_image);
-
-    //Process 3
-    //vector<vector<Pixel>> process_image = process_03(input_image);
-
-    //Process 4
-    //vector<vector<Pixel>> process_image = process_04(input_image);
-
-    //Process 5
-    //vector<vector<Pixel>> process_image = process_05(input_image, 19);
-
-    //Process 6
-    //vector<vector<Pixel>> process_image = process_06(input_image, 1, .5);
-
-    //Process 7
-    //vector<vector<Pixel>> process_image = process_07(input_image);
-
-    //Process 8
-    //vector<vector<Pixel>> process_image = process_08(input_image);
-
-    //Process 9
-    //vector<vector<Pixel>> process_image = process_09(input_image);
-
-    //Process 10
-    //vector<vector<Pixel>> process_image = process_10(input_image);
-
-    // Outputs if it was done sucessfully
-    string output_path = "test_output.bmp";
-    if (write_image(output_path, process_image))
+    // Setting up a while loop to run the application repeatedly until 
+    // exit is called
+    while (input_val != "q" || input_val != "Q" )
     {
-        cout << "Sucessful write: " << output_path << endl;
-    } else 
-    {
-        cout << "Failed to output" << endl;
-    }
-    return 0;
-    
+
+        cout << endl << " -- Enter q to exit" << endl << endl
+        << "   Enter a file: " << endl;
+
+        // Input takes file path, and exists the app if invalid
+        cin >> file_path;
+        if (cin.fail())
+        {
+            cin.clear();
+            cin.ignore();
+            cout << "ERROR: Invalid input, please try again" << endl << endl;
+            break;
+
+        } else if (file_path == "q" || file_path == "Q") 
+        {
+            cout << "   Quitting... " << endl;
+            input_val = "q";
+            break;
+        } else
+        {
+            // Validates file path
+            try {
+                // Reads in an image at a given path
+                vector<vector<Pixel>> input_image = read_image(file_path);
+                if (input_image.size() <= 0) {
+                    cout << "ERROR: Unable to read image, please try again" << endl
+                    << "Please ensure your image is a .bmp file and the path is valid"<< endl << endl;
+                    input_val = "c";
+                } else 
+                {
+                    cout <<endl << "   Image read sucessfully" << endl << endl;
+
+                    /*
+                    Main Menu input
+                    Provides various options to process images
+                    */ 
+
+                   while (menu_val != "q" || menu_val != "Q")
+                   {
+                    cout << endl << "---------------------------" << endl
+                    << "IMAGE PROCESSING OPTIONS" << endl
+                    << "---------------------------" << endl
+                    << "   Current image: " << file_path << endl << endl
+                    << "0) Change Image" << endl
+                    << "1) Vignette" << endl 
+                    << "2) Claredon" << endl
+                    << "3) Greyscale" << endl 
+                    << "4) Rotate 90 Degrees" << endl 
+                    << "5) Rotate Multiple Times" << endl 
+                    << "6) Enlarge" << endl
+                    << "7) High Contrast" << endl 
+                    << "8) Lighten" << endl 
+                    << "9) Darken" << endl 
+                    << "10) Black, White, RGB" << endl << endl
+                    << " -- Enter q to exit" << endl;
+
+                    cin >> menu_val; // Takes menu input
+
+                    // Exits the application with a q
+                    if (menu_val == "q" || menu_val == "Q" ){
+                        cout << "   Quitting... " << endl;
+                        return 0;
+                    } else
+                    {
+                        try
+                        {
+                            int menu = stoi(menu_val);
+                            if (menu >= 0 && menu <= 10){
+
+                                vector<vector<Pixel>> process_image;
+                                int image_modified = 0;
+
+                                switch (menu) {
+                                    case 0:
+                                        cout << endl << "  Input new file path:" << endl;
+                                        cin >> file_path;
+                                        input_image = read_image(file_path);
+                                        if (input_image.size() <= 0) {
+                                            cout << "ERROR: Unable to read image, please try again" << endl
+                                            << "Please ensure your image is a .bmp file and the path is valid" << endl << endl;
+                                            break;
+                                        } else 
+                                        {
+                                            cout <<endl << "   Image read sucessfully" << endl << endl;
+                                            break;
+                                        }
+
+                                    case 1:
+                                        cout << endl << "  Running: Process 01" << endl;
+                                        process_image = process_01(input_image);
+                                        image_modified = 1;
+                                        break;
+
+                                    case 2:
+                                        cout << endl << "  Running: Process 02" << endl;
+                                        process_image = process_02(input_image);
+                                        image_modified = 1;
+                                        break;
+
+                                    case 3:
+                                        cout << endl << "  Running: Process 03" << endl;
+                                        process_image = process_03(input_image);
+                                        image_modified = 1;
+                                        break;
+
+                                    case 4:
+                                        cout << endl << "  Running: Process 04" << endl;
+                                        process_image = process_04(input_image);
+                                        image_modified = 1;
+                                        break;
+
+                                    case 5:
+                                        int rotations;
+                                        cout << endl << "  Running: Process 05" << endl
+                                        << "   Enter number of rotations. Integers only: " << endl;
+                                        cin >> rotations;
+                                        if (cin.fail())
+                                        {
+                                            cin.clear();
+                                            cin.ignore();
+                                            cout << "ERROR: Invalid input" << endl;
+                                            image_modified = 0;
+                                            menu_val = "404";
+                                            break;
+                                        } else 
+                                        {
+                                            process_image = process_05(input_image, rotations);
+                                            image_modified = 1;
+                                            break;
+                                        }
+                                        cout << "Test 01" << endl;
+                                        break;
+
+
+                                    case 6:
+                                        double x_scale;
+                                        double y_scale;
+                                        cout << endl << "  Running: Process 06" << endl
+                                        << "   Enter x scale value and y scale value.  Number values only: " << endl;
+                                        cin >> x_scale >> y_scale;
+
+                                        if (cin.fail())
+                                        {
+                                            cin.clear();
+                                            cin.ignore();
+                                            cout << "ERROR: Invalid input" << endl;
+                                            image_modified = 0;
+                                            //return 0;
+                                        } else 
+                                        {
+                                            process_image = process_06(input_image, x_scale, y_scale);
+                                            image_modified = 1;
+                                            break;
+                                        }
+                                        break;
+
+                                    case 7:
+                                        cout << endl << "  Running: Process 07" << endl;
+                                        process_image = process_07(input_image);
+                                        image_modified = 1;
+                                        break;
+
+                                    case 8:
+                                        cout << endl << "  Running: Process 08" << endl;
+                                        process_image = process_08(input_image);
+                                        image_modified = 1;
+                                        break;
+
+                                    case 9:
+                                        cout << endl << "  Running: Process 09" << endl;
+                                        process_image = process_09(input_image);
+                                        image_modified = 1;
+                                        break;
+
+                                    case 10:
+                                        cout << endl << "  Running: Process 10" << endl;
+                                        process_image = process_10(input_image);
+                                        image_modified = 1;
+                                        break;
+                                        
+                                }
+
+                                if (image_modified == 1)
+                                {
+                                    string output_path;
+                                    cout << "  Image output path: " << endl;
+                                    cin >> output_path;
+                                    if (cin.fail()){
+                                        cin.clear();
+                                        cin.ignore();
+                                        break;
+                                    } else
+                                    {
+                                        if (write_image(output_path, process_image))
+                                        {
+                                            cout << "Sucessful write: " << output_path << endl;
+                                        } else 
+                                        {
+                                            cout << "Failed to output" << endl;
+                                        }
+                                        return 0;
+                                    }
+
+                                    
+                                }
+
+                            }
+                            else
+                            {
+                                cout << endl << "ERROR: Invalid menu option" << endl
+                                << "Please try again" << endl << endl; 
+                                break;   
+                            }
+                        cout << "Test 02" << endl;
+
+                        } catch (exception& ex)
+                        {
+                            cout << endl << "ERROR: Invalid menu option" << endl
+                            << "Please try again" << endl << endl;
+                            cout << "Test 06" << endl;
+                        }
+                    
+                    cout << "Test 03" << endl;
+                    }
+                    cout << "Test 07" << endl;
+                    } // HERE ?????
+                    //if (menu_val == "404")
+                    //{
+                    //    break;
+                    //}
+                    return 0;
+                cout << "Test 04" << endl;
+
+            }
+
+            // Error catcher
+            } catch(string error_str) {
+                cout << "ERROR: " << error_str << endl;
+                cout << "Unable to process image, please try again" << endl;
+            }
+
+
+            
+        } 
+            /*
+            // Process 1
+            //vector<vector<Pixel>> process_image = process_01(input_image);
+
+            // Process 2
+            //vector<vector<Pixel>> process_image = process_02(input_image);
+
+            //Process 3
+            //vector<vector<Pixel>> process_image = process_03(input_image);
+
+            //Process 4
+            //vector<vector<Pixel>> process_image = process_04(input_image);
+
+            //Process 5
+            //vector<vector<Pixel>> process_image = process_05(input_image, 19);
+
+            //Process 6
+            //vector<vector<Pixel>> process_image = process_06(input_image, 1, .5);
+
+            //Process 7
+            //vector<vector<Pixel>> process_image = process_07(input_image);
+
+            //Process 8
+            //vector<vector<Pixel>> process_image = process_08(input_image);
+
+            //Process 9
+            //vector<vector<Pixel>> process_image = process_09(input_image);
+
+            //Process 10
+            //vector<vector<Pixel>> process_image = process_10(input_image);
+
+            // Outputs if it was done sucessfully
+            string output_path = "test_output.bmp";
+            if (write_image(output_path, process_image))
+            {
+                cout << "Sucessful write: " << output_path << endl;
+            } else 
+            {
+                cout << "Failed to output" << endl;
+            }
+            return 0;
+            */
+        
+
+   }
 }
