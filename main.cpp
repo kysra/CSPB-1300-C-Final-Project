@@ -258,23 +258,21 @@ vector<vector<Pixel>> process_01 (vector<vector<Pixel>> image_file)
             Pixel rgb = image_file[y][x];
 
             // Calculates vignette gradient
-            double dist_y = 1 - pow(2*abs(.5 - static_cast<double>(y)/static_cast<double>(file_height-1)),2);
-            double dist_x = 1 - pow(2*abs(.5 - static_cast<double>(x)/static_cast<double>(file_width-1)),2);
+            double dist_y = 1 - pow(2*abs(.5 - static_cast<double>(y)/static_cast<double>(file_height-1)),1.5);
+            double dist_x = 1 - pow(2*abs(.5 - static_cast<double>(x)/static_cast<double>(file_width-1)),1.5);
             
             // Applies the gradient
             rgb.red = static_cast<int>(round(rgb.red * dist_y * dist_x));
             rgb.green = static_cast<int>(round(rgb.green * dist_y * dist_x));
             rgb.blue = static_cast<int>(round(rgb.blue * dist_y * dist_x));
             image_file[y][x] = rgb;
-
         }
     }
     cout << "Executed Process 01: Add Vignette" << endl;
-
     return image_file;
 }
 
-vector<vector<Pixel>> process_02 (vector<vector<Pixel>> image_file)
+vector<vector<Pixel>> process_02 (vector<vector<Pixel>> image_file, double scaling)
 /**
  * Makes a high contrast version of the image
  * If the average RGB value of the image is 
@@ -286,7 +284,6 @@ vector<vector<Pixel>> process_02 (vector<vector<Pixel>> image_file)
     // Get the size of the image
     int file_height = image_file.size();
     int file_width = image_file[0].size();
-    double scaling = .3;
 
     // Loops through the pixels in image
     for (int y = 0; y < file_height; y++)
@@ -310,16 +307,15 @@ vector<vector<Pixel>> process_02 (vector<vector<Pixel>> image_file)
                 rgb.green = static_cast<int>(round(rgb.green*scaling));
                 rgb.blue = static_cast<int>(round(rgb.blue*scaling));
             }
-
             // Applies the changes to the image file
             image_file[y][x] = rgb;
 
         }
     }
-    cout << "Executed Process 02: Add Contrast" << endl;
-
+    cout << "Executed Process 02: Claredon by factor of " << scaling << endl;
     return image_file;
 }
+
 
 vector<vector<Pixel>> process_03 (vector<vector<Pixel>> image_file)
 /**
@@ -350,9 +346,9 @@ vector<vector<Pixel>> process_03 (vector<vector<Pixel>> image_file)
         }
     }
     cout << "Executed Process 03: Greyscale" << endl;
-
     return image_file;
 }
+
 
 vector<vector<Pixel>> process_04 (vector<vector<Pixel>> image_file)
 /**
@@ -363,7 +359,6 @@ vector<vector<Pixel>> process_04 (vector<vector<Pixel>> image_file)
     // Get the size of the image
     int file_height = image_file.size();
     int file_width = image_file[0].size();
-
 
     // Creates a new image that is rotated
     vector<vector<Pixel>> rotated_image (file_width, 
@@ -381,14 +376,10 @@ vector<vector<Pixel>> process_04 (vector<vector<Pixel>> image_file)
 
         }
     }
-    //cout << "Old File Height: " << file_height << " Old File Width: " << file_width << endl;
-    //cout << "New File Height: " << rotated_image.size() << " New File Width: " << rotated_image[0].size() << endl;
-    //cout << "Old Pixel (24, 165): " << image_file[124][165].red << "," << image_file[124][165].green << "," << image_file[124][165].blue << endl;
-    //cout << "New Pixel (24, 165): " << rotated_image[124][165].red << "," << rotated_image[124][165].green << "," << rotated_image[124][165].blue << endl;
     cout << "Executed Process 04: Rotate 90 Degrees" << endl;
-
     return rotated_image;
 }
+
 
 vector<vector<Pixel>> process_05 (vector<vector<Pixel>> image_file, int turns)
 /**
@@ -421,7 +412,8 @@ vector<vector<Pixel>> process_05 (vector<vector<Pixel>> image_file, int turns)
         {
             turns = turns - 4;
         }
-        // Positive number of turns count down
+        // Applies the number of turns after reducing to minimum
+        // number of clockwise turns
         if (turns < 5)
         {
             rotated_image  = process_04(rotated_image);
@@ -429,9 +421,8 @@ vector<vector<Pixel>> process_05 (vector<vector<Pixel>> image_file, int turns)
         }
         
     }
-    cout << "Executed Process 05: Rotated Multiples of 90 Degrees" << endl;
+    cout << "Executed Process 05: Rotated 90 Degrees " << turns << " times" << endl;
     return rotated_image;
-
 }
 
 vector<vector<Pixel>> process_06 (vector<vector<Pixel>> image_file, float scale_x, float scale_y)
@@ -458,14 +449,10 @@ vector<vector<Pixel>> process_06 (vector<vector<Pixel>> image_file, float scale_
     // Get the size of the image
     int file_height = image_file.size();
     int file_width = image_file[0].size();
-    cout << "Height: " << file_height << " Width: " << file_width << endl;
 
     // Creates a new vector that is the size of the scaled image
     int scaled_height = static_cast<int>(round(file_height * scale_y));
     int scaled_width = static_cast<int>(round(file_width * scale_x));
-    cout << "Scaled Height: " << scaled_height << " Scaled Width: " << scaled_width << endl;
-
-    cout << "scale_x: " << scale_x << " scale_y: " << scale_y << endl;
     vector<vector<Pixel>> scaled_image (scaled_height, 
                                         vector<Pixel> (scaled_width)); 
 
@@ -484,7 +471,7 @@ vector<vector<Pixel>> process_06 (vector<vector<Pixel>> image_file, float scale_
 
         }
     }    
-    cout << "Executed Process 06: Scaled image" << endl;
+    cout << "Executed Process 06: Scaled image " << scale_x << " by " << scale_y << endl;
     return scaled_image;
 }
 
@@ -528,7 +515,7 @@ vector<vector<Pixel>> process_07 (vector<vector<Pixel>> image_file)
     return image_file;
 }
 
-vector<vector<Pixel>> process_08 (vector<vector<Pixel>> image_file)
+vector<vector<Pixel>> process_08 (vector<vector<Pixel>> image_file, double scaling)
 /**
  * Lightens image by the scaling factor
  * @param image_file The image file to be editted
@@ -537,7 +524,6 @@ vector<vector<Pixel>> process_08 (vector<vector<Pixel>> image_file)
     // Get the size of the image
     int file_height = image_file.size();
     int file_width = image_file[0].size();
-    double scaling = .8;
 
     // Loops through the pixels in image
     for (int y = 0; y < file_height; y++)
@@ -555,11 +541,11 @@ vector<vector<Pixel>> process_08 (vector<vector<Pixel>> image_file)
 
         }
     }
-    cout << "Executed Process 08: Lighten" << endl;
+    cout << "Executed Process 08: Lightened by factor of " << scaling << endl;
     return image_file;
 }
 
-vector<vector<Pixel>> process_09 (vector<vector<Pixel>> image_file)
+vector<vector<Pixel>> process_09 (vector<vector<Pixel>> image_file, double scaling)
 /**
  * Darkens image by the scaling factor
  * @param image_file The image file to be editted
@@ -568,7 +554,6 @@ vector<vector<Pixel>> process_09 (vector<vector<Pixel>> image_file)
     // Get the size of the image
     int file_height = image_file.size();
     int file_width = image_file[0].size();
-    double scaling = .8;
 
     // Loops through the pixels in image
     for (int y = 0; y < file_height; y++)
@@ -586,7 +571,7 @@ vector<vector<Pixel>> process_09 (vector<vector<Pixel>> image_file)
 
         }
     }
-    cout << "Executed Process 09: Darken" << endl;
+    cout << "Executed Process 09: Darken by factor of " << scaling << endl;
     return image_file;
 }
 
@@ -654,14 +639,15 @@ vector<vector<Pixel>> process_10 (vector<vector<Pixel>> image_file)
     return image_file;
 }
 
+
 int main()
-/* Provides a UI for the image processing application
+/* 
+Provides a UI for the image processing application
 */
 {
     // Initial variable set up
-    string sentinel;
-    string input_val;
-    string menu_val;
+    string input_val;           // Checks inputs for initial file path entry
+    string menu_val;            // Checks inputs for menu of imgage modifications
     string file_path;
     // Initial menu UI
     cout << endl << "----------------======----------------" << endl
@@ -675,12 +661,14 @@ int main()
     {
 
         cout << endl << " -- Enter q to exit" << endl << endl
-        << "   Enter a file: " << endl;
+        << "   Enter a file path: " << endl;
 
-        // Input takes file path, and exists the app if invalid
+        // Input takes file path, loops back to top if invalid
         cin >> file_path;
+
         if (cin.fail())
         {
+            // Validates input, clears errors if invalid
             cin.clear();
             cin.ignore();
             cout << "ERROR: Invalid input, please try again" << endl << endl;
@@ -688,14 +676,16 @@ int main()
 
         } else if (file_path == "q" || file_path == "Q") 
         {
+            // Exits while loop and the application
             cout << "   Quitting... " << endl;
             input_val = "q";
             break;
         } else
         {
-            // Validates file path
-            try {
-                // Reads in an image at a given path
+            // If path is a valid entry, will try to open the image file
+            // Image with size 0 / unable to read will loop back to the menu
+            try 
+            {
                 vector<vector<Pixel>> input_image = read_image(file_path);
                 if (input_image.size() <= 0) {
                     cout << "ERROR: Unable to read image, please try again" << endl
@@ -704,17 +694,15 @@ int main()
                 } else 
                 {
                     cout <<endl << "   Image read sucessfully" << endl << endl;
-
                     /*
                     Main Menu input
                     Provides various options to process images
                     */ 
-
                    while (menu_val != "q" || menu_val != "Q")
                    {
-                    cout << endl << "---------------------------" << endl
+                    cout << endl << "------------------------" << endl
                     << "IMAGE PROCESSING OPTIONS" << endl
-                    << "---------------------------" << endl
+                    << "------------------------" << endl
                     << "   Current image: " << file_path << endl << endl
                     << "0) Change Image" << endl
                     << "1) Vignette" << endl 
@@ -722,14 +710,14 @@ int main()
                     << "3) Greyscale" << endl 
                     << "4) Rotate 90 Degrees" << endl 
                     << "5) Rotate Multiple Times" << endl 
-                    << "6) Enlarge" << endl
+                    << "6) Scale" << endl
                     << "7) High Contrast" << endl 
                     << "8) Lighten" << endl 
                     << "9) Darken" << endl 
                     << "10) Black, White, RGB" << endl << endl
                     << " -- Enter q to exit" << endl;
 
-                    cin >> menu_val; // Takes menu input
+                    cin >> menu_val; 
 
                     // Exits the application with a q
                     if (menu_val == "q" || menu_val == "Q" ){
@@ -737,16 +725,21 @@ int main()
                         return 0;
                     } else
                     {
+                        // Will attempt to convert string memu entry into a int
+                        // If it fails, it will be caught and returned to the menu
+                        // On sucess, will generate an empty vector for the modified image
                         try
                         {
                             int menu = stoi(menu_val);
                             if (menu >= 0 && menu <= 10){
 
                                 vector<vector<Pixel>> process_image;
-                                int image_modified = 0;
+                                int image_modified = 0;         // Tracks if image was sucessfully modified
+                                double scaling;                 // Strength of effect to be applied
 
                                 switch (menu) {
                                     case 0:
+                                    // Option to select a new image
                                         cout << endl << "  Input new file path:" << endl;
                                         cin >> file_path;
                                         input_image = read_image(file_path);
@@ -761,31 +754,53 @@ int main()
                                         }
 
                                     case 1:
+                                    // Process 01 - Adds a Vignette
                                         cout << endl << "  Running: Process 01" << endl;
                                         process_image = process_01(input_image);
                                         image_modified = 1;
                                         break;
 
                                     case 2:
+                                    // Process 2 - Claredon Effect
+                                        cout << "   Strength of effect:" << endl
+                                        << "Enter a value between 0 and 1 " << endl
+                                        << "   0 ------------ .5 ------------ 1 " << endl
+                                        << "strong ------------------------ weak" << endl;
+                                        cin >> scaling;     // Strength of effect
+                                        if (cin.fail() || scaling > 1 || scaling < 0)
+                                        {
+                                            cin.clear();
+                                            cin.ignore();
+                                            cout << endl <<"ERROR: Invalid input" << endl;
+                                            image_modified = 0;
+                                            menu_val = "404";
+                                            // Loops back to menu on invalid input
+                                            break;
+                                        } else 
+                                        {
                                         cout << endl << "  Running: Process 02" << endl;
-                                        process_image = process_02(input_image);
+                                        process_image = process_02(input_image, scaling);
                                         image_modified = 1;
                                         break;
+                                        }
 
                                     case 3:
+                                    // Process 3 - Greyscale Image
                                         cout << endl << "  Running: Process 03" << endl;
                                         process_image = process_03(input_image);
                                         image_modified = 1;
                                         break;
 
                                     case 4:
+                                    // Process 4 - Rotate by 90 Degrees
                                         cout << endl << "  Running: Process 04" << endl;
                                         process_image = process_04(input_image);
                                         image_modified = 1;
                                         break;
 
                                     case 5:
-                                        int rotations;
+                                    // Process 5 - Rotate by 90 Degrees multiple times
+                                        int rotations;      // Number of rotations
                                         cout << endl << "  Running: Process 05" << endl
                                         << "   Enter number of rotations. Integers only: " << endl;
                                         cin >> rotations;
@@ -793,9 +808,10 @@ int main()
                                         {
                                             cin.clear();
                                             cin.ignore();
-                                            cout << "ERROR: Invalid input" << endl;
+                                            cout << endl << "ERROR: Invalid input" << endl;
                                             image_modified = 0;
                                             menu_val = "404";
+                                            // Loops back to menu on invalid input
                                             break;
                                         } else 
                                         {
@@ -808,8 +824,9 @@ int main()
 
 
                                     case 6:
-                                        double x_scale;
-                                        double y_scale;
+                                    // Process 6 - Scale image on x and y axis
+                                        double x_scale;     // Amount to scale x
+                                        double y_scale;     // Amounts to scale y
                                         cout << endl << "  Running: Process 06" << endl
                                         << "   Enter x scale value and y scale value.  Number values only: " << endl;
                                         cin >> x_scale >> y_scale;
@@ -818,9 +835,11 @@ int main()
                                         {
                                             cin.clear();
                                             cin.ignore();
-                                            cout << "ERROR: Invalid input" << endl;
+                                            cout << endl << "ERROR: Invalid input" << endl;
                                             image_modified = 0;
-                                            //return 0;
+                                            menu_val = "404";
+                                            // Loops back to menu on invalid input
+                                            break;
                                         } else 
                                         {
                                             process_image = process_06(input_image, x_scale, y_scale);
@@ -830,24 +849,64 @@ int main()
                                         break;
 
                                     case 7:
+                                    // Process 7 - Black and White Conversion
                                         cout << endl << "  Running: Process 07" << endl;
                                         process_image = process_07(input_image);
                                         image_modified = 1;
                                         break;
 
                                     case 8:
+                                    // Process 8 - Lighten
+                                        cout << "   Strength of effect:" << endl
+                                        << "Enter a value between 0 and 1 " << endl
+                                        << "   0 ------------ .5 ------------ 1 " << endl
+                                        << "strong ------------------------ weak" << endl;
+                                        cin >> scaling;     // Strength of effect
+
+                                        if (cin.fail() || scaling > 1 || scaling < 0)
+                                        {
+                                            cin.clear();
+                                            cin.ignore();
+                                            cout << endl <<"ERROR: Invalid input" << endl;
+                                            image_modified = 0;
+                                            menu_val = "404";
+                                            // Loops back to menu on invalid input
+                                            break;
+                                        } else 
+                                        {
                                         cout << endl << "  Running: Process 08" << endl;
-                                        process_image = process_08(input_image);
+                                        process_image = process_08(input_image, scaling);
                                         image_modified = 1;
                                         break;
+                                        }
 
                                     case 9:
+                                    // Process 9 - Darken
+                                        cout << "   Strength of effect:" << endl
+                                        << "Enter a value between 0 and 1 " << endl
+                                        << "   0 ------------ .5 ------------ 1 " << endl
+                                        << "strong ------------------------ weak" << endl;
+                                        cin >> scaling;     // Strength of effect
+
+                                        if (cin.fail() || scaling > 1 || scaling < 0)
+                                        {
+                                            cin.clear();
+                                            cin.ignore();
+                                            cout << endl <<"ERROR: Invalid input" << endl;
+                                            image_modified = 0;
+                                            menu_val = "404";
+                                            // Loops back to menu on invalid input
+                                            break;
+                                        } else 
+                                        {
                                         cout << endl << "  Running: Process 09" << endl;
-                                        process_image = process_09(input_image);
+                                        process_image = process_09(input_image, scaling);
                                         image_modified = 1;
                                         break;
+                                        }
 
                                     case 10:
+                                    // Process 10 - Black, White, RGB
                                         cout << endl << "  Running: Process 10" << endl;
                                         process_image = process_10(input_image);
                                         image_modified = 1;
@@ -855,14 +914,18 @@ int main()
                                         
                                 }
 
+                                // If image has been modified, it will ask for a file path
+                                // to output the new image
                                 if (image_modified == 1)
                                 {
                                     string output_path;
-                                    cout << "  Image output path: " << endl;
+                                    cout << "  Image output path: " << endl
+                                    << " -- Enter q to discard changes and return to menu" << endl;
                                     cin >> output_path;
-                                    if (cin.fail()){
+                                    if (cin.fail() || output_path == "q" || output_path == "Q"){
                                         cin.clear();
                                         cin.ignore();
+                                        // Returns to menu and discards changes on invalid entry or q
                                         break;
                                     } else
                                     {
@@ -874,92 +937,29 @@ int main()
                                             cout << "Failed to output" << endl;
                                         }
                                         return 0;
-                                    }
-
-                                    
+                                    }  
                                 }
-
                             }
                             else
+                            // Error catcher for user input of integer <0 or > 10
                             {
                                 cout << endl << "ERROR: Invalid menu option" << endl
                                 << "Please try again" << endl << endl; 
                                 break;   
                             }
-                        cout << "Test 02" << endl;
-
                         } catch (exception& ex)
+                        // catch for errors in image processing menu options
                         {
                             cout << endl << "ERROR: Invalid menu option" << endl
                             << "Please try again" << endl << endl;
-                            cout << "Test 06" << endl;
                         }
-                    
-                    cout << "Test 03" << endl;
                     }
-                    cout << "Test 07" << endl;
-                    } // HERE ?????
-                    //if (menu_val == "404")
-                    //{
-                    //    break;
-                    //}
-                    return 0;
-                cout << "Test 04" << endl;
-
+                } 
             }
-
-            // Error catcher
-            } catch(string error_str) {
-                cout << "ERROR: " << error_str << endl;
-                cout << "Unable to process image, please try again" << endl;
-            }
-
-
-            
+            // catch for errors in running the image processing
+            } catch(exception& ex) {
+                cout << "ERROR: Unable to process image, please try again" << endl;
+            } 
         } 
-            /*
-            // Process 1
-            //vector<vector<Pixel>> process_image = process_01(input_image);
-
-            // Process 2
-            //vector<vector<Pixel>> process_image = process_02(input_image);
-
-            //Process 3
-            //vector<vector<Pixel>> process_image = process_03(input_image);
-
-            //Process 4
-            //vector<vector<Pixel>> process_image = process_04(input_image);
-
-            //Process 5
-            //vector<vector<Pixel>> process_image = process_05(input_image, 19);
-
-            //Process 6
-            //vector<vector<Pixel>> process_image = process_06(input_image, 1, .5);
-
-            //Process 7
-            //vector<vector<Pixel>> process_image = process_07(input_image);
-
-            //Process 8
-            //vector<vector<Pixel>> process_image = process_08(input_image);
-
-            //Process 9
-            //vector<vector<Pixel>> process_image = process_09(input_image);
-
-            //Process 10
-            //vector<vector<Pixel>> process_image = process_10(input_image);
-
-            // Outputs if it was done sucessfully
-            string output_path = "test_output.bmp";
-            if (write_image(output_path, process_image))
-            {
-                cout << "Sucessful write: " << output_path << endl;
-            } else 
-            {
-                cout << "Failed to output" << endl;
-            }
-            return 0;
-            */
-        
-
    }
 }
