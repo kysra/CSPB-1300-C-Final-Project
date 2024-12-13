@@ -8,13 +8,14 @@ PLEASE FILL OUT THIS SECTION PRIOR TO SUBMISSION
     Cat Shen
 
 - All project requirements fully met? (YES or NO):
-    <ANSWER>
+    Yes
 
 - If no, please explain what you could not get to work:
-    <ANSWER>
+    No
 
 - Did you do any optional enhancements? If so, please explain:
-    <ANSWER>
+    Yes
+    I added Process 11, which will allow you to layer two images on top of each other 
 */
 
 #include <iostream>
@@ -279,6 +280,7 @@ vector<vector<Pixel>> process_02 (vector<vector<Pixel>> image_file, double scali
  * greater than 170, colors will be pushed brighter
  * and vice versa for lower than 90
  * @param image_file The image file to be editted
+ * @param scaling Strength of the effect on the image
  */
 {
     // Get the size of the image
@@ -391,6 +393,7 @@ vector<vector<Pixel>> process_05 (vector<vector<Pixel>> image_file, int turns)
 
     cout << "Rotating 90 degrees " << turns << " times" << endl;
     vector<vector<Pixel>> rotated_image  = image_file;
+    int num_turns = turns;
 
     // If the image is being turned 0 times, or 360 times, we will return the 
     // original image without turning
@@ -405,7 +408,7 @@ vector<vector<Pixel>> process_05 (vector<vector<Pixel>> image_file, int turns)
         // Converts counterclockwise turns to clockwise turns
         while (turns < 0)
         {
-            turns = turns + 4; 
+            turns = turns + 4;
         }
         // Reduces number of turns for huge numbers
         while (turns >= 5)
@@ -421,13 +424,14 @@ vector<vector<Pixel>> process_05 (vector<vector<Pixel>> image_file, int turns)
         }
         
     }
-    cout << "Executed Process 05: Rotated 90 Degrees " << turns << " times" << endl;
+    cout << "Executed Process 05: Rotated 90 Degrees " << num_turns << " times" << endl;
     return rotated_image;
 }
 
 vector<vector<Pixel>> process_06 (vector<vector<Pixel>> image_file, float scale_x, float scale_y)
 /**
  * Scales the image larger or smaller
+ * @param image_file Image that will be scaled
  * @param scale_x Amount to scale the image by on the x axis
  * @param scale_y Amount to scale the image by on the y axis
  */
@@ -449,7 +453,6 @@ vector<vector<Pixel>> process_06 (vector<vector<Pixel>> image_file, float scale_
     // Get the size of the image
     int file_height = image_file.size();
     int file_width = image_file[0].size();
-
     // Creates a new vector that is the size of the scaled image
     int scaled_height = static_cast<int>(round(file_height * scale_y));
     int scaled_width = static_cast<int>(round(file_width * scale_x));
@@ -466,6 +469,13 @@ vector<vector<Pixel>> process_06 (vector<vector<Pixel>> image_file, float scale_
             int descaled_height = static_cast<int>(round(y/scale_y));
             int descaled_width = static_cast<int>(round(x/scale_x));
 
+            // Preventing this from rounding up over out of bounds
+            while (descaled_height > file_height-1){
+                descaled_height--;
+            }
+            while (descaled_width > file_width-1){
+                descaled_width--;
+            }
             Pixel rgb = image_file[descaled_height][descaled_width];
             scaled_image[y][x] = rgb;
 
@@ -519,6 +529,7 @@ vector<vector<Pixel>> process_08 (vector<vector<Pixel>> image_file, double scali
 /**
  * Lightens image by the scaling factor
  * @param image_file The image file to be editted
+ * @param scaling Strength of the effect on the image
  */
 {
     // Get the size of the image
@@ -549,6 +560,7 @@ vector<vector<Pixel>> process_09 (vector<vector<Pixel>> image_file, double scali
 /**
  * Darkens image by the scaling factor
  * @param image_file The image file to be editted
+ * @param scaling Strength of the effect on the image
  */
 {
     // Get the size of the image
@@ -639,6 +651,75 @@ vector<vector<Pixel>> process_10 (vector<vector<Pixel>> image_file)
     return image_file;
 }
 
+vector<vector<Pixel>> process_11 (vector<vector<Pixel>> image_file, vector<vector<Pixel>> layer_image, double scaling)
+{
+/**
+ * Layers one image on top of the other, using the scaling argument to blend the two
+ * Second image will be centered on the original image
+ * @param image_file The image file on the bottom
+ * @param image_file The image file layers on top
+ * @param scaling The transparency of the top image
+ */
+
+    // Get the size of the images
+    int file_height = image_file.size();
+    int file_width = image_file[0].size();
+    int layer_height = layer_image.size();
+    int layer_width = layer_image[0].size();
+    int y_difference = abs(round((layer_height-file_height)/2));
+    int x_difference = abs(round((layer_width-file_width)/2));
+
+    // Setting up image placement
+    // Layered image will be centered on bottom image
+
+    // Crops the layer image to the same size as original image
+    // if it is larger. Removes pixels evenly from either side.
+    // Crops down height
+    if (file_height < layer_height){
+        for (int n = 0; n < y_difference; n++)
+        {
+            layer_image.erase(layer_image.begin());
+            layer_image.erase(layer_image.end());
+        }
+        // Reassigns height size and recalcs height difference
+        layer_height = layer_image.size();
+        y_difference = round((layer_height-file_height)/2);
+    }
+    // Crops down width
+    if (file_width < layer_width){
+        for (int y = 0; y < layer_height; y++)
+        {
+            for (int n = 0; n < x_difference; n++)
+            {
+                layer_image[y].erase(layer_image[y].begin());
+                layer_image[y].erase(layer_image[y].end());
+            }
+        }
+        // Reassigns width and recalcs width difference
+        layer_width = layer_image[0].size();
+        x_difference = round((layer_width-file_width)/2);
+    }
+    // Adds the nwe image on top of the old image using the scaling parameter
+    // to calculate transparency. Centers the layered image on top
+    for (int y = 0; y < layer_height; y++)
+    {
+        for (int x = 0; x < layer_width; x++)
+        {
+            Pixel image_rgb = image_file[y+y_difference][x+x_difference];
+            Pixel layer_rgb = layer_image[y][x];
+
+            image_rgb.red = image_rgb.red * (scaling) + layer_rgb.red * (1 - scaling);
+            image_rgb.green = image_rgb.green * (scaling) + layer_rgb.green * (1 - scaling);
+            image_rgb.blue = image_rgb.blue * (scaling) + layer_rgb.blue * (1 - scaling);
+
+            image_file[y+y_difference][x+x_difference] = image_rgb;
+        }
+    }
+    cout << "Executed Process 11: Layer Images with " << scaling << " Transparency" << endl;
+    return image_file;
+
+}
+
 
 int main()
 /* 
@@ -670,8 +751,7 @@ Provides a UI for the image processing application
         {
             // Validates input, clears errors if invalid
             cin.clear();
-            cin.ignore();
-            cout << "ERROR: Invalid input, please try again" << endl << endl;
+            cout << endl << "ERROR: Invalid input, please try again" << endl << endl;
             break;
 
         } else if (file_path == "q" || file_path == "Q") 
@@ -688,7 +768,7 @@ Provides a UI for the image processing application
             {
                 vector<vector<Pixel>> input_image = read_image(file_path);
                 if (input_image.size() <= 0) {
-                    cout << "ERROR: Unable to read image, please try again" << endl
+                    cout << endl << "ERROR: Unable to read image, please try again" << endl
                     << "Please ensure your image is a .bmp file and the path is valid"<< endl << endl;
                     input_val = "c";
                 } else 
@@ -714,7 +794,8 @@ Provides a UI for the image processing application
                     << "7) High Contrast" << endl 
                     << "8) Lighten" << endl 
                     << "9) Darken" << endl 
-                    << "10) Black, White, RGB" << endl << endl
+                    << "10) Black, White, RGB" << endl 
+                    << "11) Layer Images" << endl << endl
                     << " -- Enter q to exit" << endl;
 
                     cin >> menu_val; 
@@ -731,7 +812,7 @@ Provides a UI for the image processing application
                         try
                         {
                             int menu = stoi(menu_val);
-                            if (menu >= 0 && menu <= 10){
+                            if (menu >= 0 && menu <= 11){
 
                                 vector<vector<Pixel>> process_image;
                                 int image_modified = 0;         // Tracks if image was sucessfully modified
@@ -744,7 +825,7 @@ Provides a UI for the image processing application
                                         cin >> file_path;
                                         input_image = read_image(file_path);
                                         if (input_image.size() <= 0) {
-                                            cout << "ERROR: Unable to read image, please try again" << endl
+                                            cout << endl << "ERROR: Unable to read image, please try again" << endl
                                             << "Please ensure your image is a .bmp file and the path is valid" << endl << endl;
                                             break;
                                         } else 
@@ -770,7 +851,6 @@ Provides a UI for the image processing application
                                         if (cin.fail() || scaling > 1 || scaling < 0)
                                         {
                                             cin.clear();
-                                            cin.ignore();
                                             cout << endl <<"ERROR: Invalid input" << endl;
                                             image_modified = 0;
                                             menu_val = "404";
@@ -807,7 +887,6 @@ Provides a UI for the image processing application
                                         if (cin.fail())
                                         {
                                             cin.clear();
-                                            cin.ignore();
                                             cout << endl << "ERROR: Invalid input" << endl;
                                             image_modified = 0;
                                             menu_val = "404";
@@ -819,8 +898,6 @@ Provides a UI for the image processing application
                                             image_modified = 1;
                                             break;
                                         }
-                                        cout << "Test 01" << endl;
-                                        break;
 
 
                                     case 6:
@@ -834,7 +911,6 @@ Provides a UI for the image processing application
                                         if (cin.fail())
                                         {
                                             cin.clear();
-                                            cin.ignore();
                                             cout << endl << "ERROR: Invalid input" << endl;
                                             image_modified = 0;
                                             menu_val = "404";
@@ -866,7 +942,6 @@ Provides a UI for the image processing application
                                         if (cin.fail() || scaling > 1 || scaling < 0)
                                         {
                                             cin.clear();
-                                            cin.ignore();
                                             cout << endl <<"ERROR: Invalid input" << endl;
                                             image_modified = 0;
                                             menu_val = "404";
@@ -891,7 +966,6 @@ Provides a UI for the image processing application
                                         if (cin.fail() || scaling > 1 || scaling < 0)
                                         {
                                             cin.clear();
-                                            cin.ignore();
                                             cout << endl <<"ERROR: Invalid input" << endl;
                                             image_modified = 0;
                                             menu_val = "404";
@@ -911,7 +985,35 @@ Provides a UI for the image processing application
                                         process_image = process_10(input_image);
                                         image_modified = 1;
                                         break;
-                                        
+                                    
+                                    case 11:
+                                    // Process 11 - Layer two images
+                                        string layer_path;
+                                        cout << endl << "  Running: Process 11" << endl
+                                        << endl << "  Input top layer image path:" << endl;
+                                        cin >> layer_path;
+                                        if (cin.fail())
+                                        {
+                                            cin.clear();
+                                            cout << endl <<"ERROR: Invalid input" << endl;
+                                            image_modified = 0;
+                                            menu_val = "404";
+                                            // Loops back to menu on invalid input
+                                            break;
+                                        } else {
+                                            vector<vector<Pixel>> layer_image = read_image(layer_path);
+                                            if (layer_image.size() <= 0) {
+                                                cout << endl << "ERROR: Unable to read image, please try again" << endl
+                                                << "Please ensure your image is a .bmp file and the path is valid" << endl << endl;
+                                                break;
+                                            } else 
+                                            {
+                                                cout <<endl << "   Image read sucessfully" << endl << endl;
+                                                process_image = process_11(input_image, layer_image, .5);
+                                                image_modified = 1;
+                                        }
+                                        }
+
                                 }
 
                                 // If image has been modified, it will ask for a file path
@@ -924,7 +1026,6 @@ Provides a UI for the image processing application
                                     cin >> output_path;
                                     if (cin.fail() || output_path == "q" || output_path == "Q"){
                                         cin.clear();
-                                        cin.ignore();
                                         // Returns to menu and discards changes on invalid entry or q
                                         break;
                                     } else
@@ -958,7 +1059,7 @@ Provides a UI for the image processing application
             }
             // catch for errors in running the image processing
             } catch(exception& ex) {
-                cout << "ERROR: Unable to process image, please try again" << endl;
+                cout << endl << "ERROR: Unable to process image, please try again" << endl;
             } 
         } 
    }
